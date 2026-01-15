@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camila's Remote</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="#d4af37">
+                    <path
+                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+                <h1>Camila's Remote</h1>
+            </div>
+        </header>
+        <!-- Hidden connection status for JS -->
+        <div class="connection-status" id="connectionStatus" style="display: none;">
+            <span class="status-dot disconnected"></span>
+            <span class="status-text">Disconnected</span>
+        </div>
+
+        <!-- Platform Selection Screen -->
+        <div class="platform-selection" id="platformSelection">
+            <h2>Choose Your TV</h2>
+            <p>Select your TV platform to get started</p>
+
+            <div class="platform-cards">
+                <!-- Roku -->
+                <div class="platform-card roku" onclick="selectPlatform('roku')">
+                    <div class="platform-icon roku">📺</div>
+                    <div class="platform-info">
+                        <h3>Roku TV</h3>
+                        <p>Roku devices & Roku TVs</p>
+                    </div>
+                </div>
+
+                <!-- Samsung -->
+                <div class="platform-card samsung" onclick="selectPlatform('samsung')">
+                    <div class="platform-icon samsung">📱</div>
+                    <div class="platform-info">
+                        <h3>Samsung TV</h3>
+                        <p>Samsung Smart TVs (2016+)</p>
+                    </div>
+                </div>
+
+                <!-- Google TV -->
+                <div class="platform-card google" onclick="selectPlatform('google')">
+                    <div class="platform-icon google">🎬</div>
+                    <div class="platform-info">
+                        <h3>Google TV</h3>
+                        <p>Android TV, Chromecast, Pixel</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Connection Panel -->
+        <div class="connection-panel" id="connectionPanel" style="display: none;">
+            <div class="connection-card">
+                <h2 id="connectionTitle">Connect to Roku</h2>
+
+                <!-- Saved Devices -->
+                <div class="saved-devices-section" id="savedDevicesSection" style="display: none;">
+                    <h3>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path
+                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                        Saved TVs
+                    </h3>
+                    <div class="saved-devices-list" id="savedDevicesList"></div>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="ipInput" placeholder="Enter Roku IP (e.g., 192.168.1.100)"
+                        autocomplete="off">
+                    <button class="btn btn-primary" id="connectBtn">Connect</button>
+                </div>
+                <div class="divider">
+                    <span>or</span>
+                </div>
+                <button class="btn btn-secondary" id="discoverBtn">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path
+                            d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z" />
+                    </svg>
+                    Discover Devices
+                </button>
+                <div class="discovered-devices" id="discoveredDevices"></div>
+            </div>
+        </div>
+
+        <!-- Remote Control -->
+        <div class="remote-container" id="remoteContainer" style="display: none;">
+            <!-- Device Info -->
+            <div class="device-info" id="deviceInfo">
+                <div class="device-info-text">
+                    <h3>Roku Device</h3>
+                    <p>192.168.1.100</p>
+                </div>
+                <button class="btn-disconnect" id="disconnectBtn">Disconnect</button>
+            </div>
+
+            <!-- Voice Search -->
+            <div class="voice-search-section">
+                <button class="btn-voice" id="voiceBtn" title="Voice Search">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                        <path
+                            d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                    </svg>
+                </button>
+                <span class="voice-status" id="voiceStatus">Click to speak</span>
+            </div>
+
+            <!-- Main Remote -->
+            <div class="remote">
+                <!-- Power & Input Row -->
+                <div class="remote-row power-row">
+                    <button class="btn-remote btn-circle" data-key="Power" title="Power">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                            <path
+                                d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z" />
+                        </svg>
+                    </button>
+                    <button class="btn-remote btn-circle" data-key="InputTuner" title="Input">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                            <path
+                                d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM9 8h2v8H9V8zm4 0h2v8h-2V8z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Navigation D-Pad -->
+                <div class="dpad-container">
+                    <button class="btn-remote btn-dpad btn-up" data-key="Up" title="Up">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                            <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z" />
+                        </svg>
+                    </button>
+                    <button class="btn-remote btn-dpad btn-left" data-key="Left" title="Left">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                        </svg>
+                    </button>
+                    <button class="btn-remote btn-ok" data-key="Select" title="OK">OK</button>
+                    <button class="btn-remote btn-dpad btn-right" data-key="Right" title="Right">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                        </svg>
+                    </button>
+                    <button class="btn-remote btn-dpad btn-down" data-key="Down" title="Down">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Back, Home, Options Row -->
+                <div class="remote-row nav-row">
+                    <button class="btn-remote btn-nav" data-key="Back" title="Back">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+                        </svg>
+                        <span>Back</span>
+                    </button>
+                    <button class="btn-remote btn-nav btn-home" data-key="Home" title="Home">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                        </svg>
+                        <span>Home</span>
+                    </button>
+                    <button class="btn-remote btn-nav" data-key="Info" title="Options">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                            <path
+                                d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                        </svg>
+                        <span>Options</span>
+                    </button>
+                </div>
+
+                <!-- Playback Controls -->
+                <div class="remote-row playback-row">
+                    <button class="btn-remote btn-playback" data-key="Rev" title="Rewind">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                            <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z" />
+                        </svg>
+                    </button>
+                    <button class="btn-remote btn-playback btn-play" data-key="Play" title="Play/Pause">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                    </button>
+                    <button class="btn-remote btn-playback" data-key="Fwd" title="Fast Forward">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                            <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Replay & Search -->
+                <div class="remote-row replay-row">
+                    <button class="btn-remote btn-small" data-key="InstantReplay" title="Instant Replay">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                            <path
+                                d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
+                        </svg>
+                    </button>
+                    <button class="btn-remote btn-small" data-key="Search" title="Search">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                            <path
+                                d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Volume Controls -->
+                <div class="remote-row volume-row">
+                    <button class="btn-remote btn-volume" data-key="VolumeDown" title="Volume Down">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                            <path
+                                d="M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM5 9v6h4l5 5V4L9 9H5z" />
+                        </svg>
+                    </button>
+                    <button class="btn-remote btn-mute" data-key="VolumeMute" title="Mute">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                            <path
+                                d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
+                        </svg>
+                    </button>
+                    <button class="btn-remote btn-volume" data-key="VolumeUp" title="Volume Up">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                            <path
+                                d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Keyboard Toggle -->
+            <button class="btn-keyboard-toggle" id="keyboardToggle">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path
+                        d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2V8zm0 3h2v2h-2v-2zM8 8h2v2H8V8zm0 3h2v2H8v-2zm-1 2H5v-2h2v2zm0-3H5V8h2v2zm9 7H8v-2h8v2zm0-4h-2v-2h2v2zm0-3h-2V8h2v2zm3 3h-2v-2h2v2zm0-3h-2V8h2v2z" />
+                </svg>
+                Open Keyboard
+            </button>
+
+            <!-- Keyboard Panel -->
+            <div class="keyboard-panel" id="keyboardPanel" style="display: none;">
+                <div class="keyboard-input-group">
+                    <input type="text" id="textInput" placeholder="Type text to send..." autocomplete="off">
+                    <button class="btn btn-primary" id="sendTextBtn">Send</button>
+                </div>
+                <div class="keyboard-shortcuts">
+                    <button class="btn-shortcut" data-key="Backspace">⌫</button>
+                    <button class="btn-shortcut" data-key="Enter">↵ Enter</button>
+                </div>
+            </div>
+
+            <!-- Installed Apps -->
+            <div class="apps-section">
+                <div class="apps-header">
+                    <h3>Installed Apps</h3>
+                    <button class="btn-refresh" id="refreshAppsBtn" title="Refresh Apps">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path
+                                d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="apps-grid" id="appsGrid">
+                    <div class="apps-loading">Loading apps...</div>
+                </div>
+            </div>
+
+            <!-- Macros Section -->
+            <div class="macros-section">
+                <div class="macros-header">
+                    <h3>Quick Click Macros</h3>
+                </div>
+                <div class="macros-grid" id="macrosGrid">
+                    <!-- Macro 1: Playlet -->
+                    <div class="macro-item" id="macroPlaylet" title="Open Playlet, navigate Left-Up-Right">
+                        <div class="macro-icon">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                <path
+                                    d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z" />
+                            </svg>
+                        </div>
+                        <span class="macro-name">Playlet</span>
+                    </div>
+
+                    <!-- Macro 2: Spotify -->
+                    <div class="macro-item" id="macroSpotify" title="Open Spotify and press OK">
+                        <div class="macro-icon" style="background: #1DB954;">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="white">
+                                <path
+                                    d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
+                            </svg>
+                        </div>
+                        <span class="macro-name">Spotify</span>
+                    </div>
+
+                    <!-- Macro 3: YouTube -->
+                    <div class="macro-item" id="macroYouTube" title="Open YouTube, wait, press OK">
+                        <div class="macro-icon">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                <path
+                                    d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                            </svg>
+                        </div>
+                        <span class="macro-name">YouTube</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Name Modal -->
+    <div class="modal-overlay" id="editModal" style="display: none;">
+        <div class="modal">
+            <h3>Edit TV Name</h3>
+            <input type="text" id="editNameInput" placeholder="Enter a name for this TV">
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" id="cancelEditBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveEditBtn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
