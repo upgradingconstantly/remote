@@ -103,41 +103,95 @@ let discoveredDevices = [];
 app.get('/api/discover', async (req, res) => {
     discoveredDevices = [];
     const client = new Client();
+    let searchComplete = false;
+
+    console.log('Starting device discovery...');
 
     client.on('response', async (headers, statusCode, rinfo) => {
-        if (headers.ST && headers.ST.includes('roku')) {
+        console.log('SSDP Response from:', rinfo.address, headers.ST);
+
+        // Check for Roku devices (multiple possible ST values)
+        const isRoku = headers.ST && (
+            headers.ST.includes('roku') ||
+            headers.ST.includes('dial-multiscreen') ||
+            headers.ST.includes('upnp:rootdevice')
+        );
+
+        if (isRoku || headers.LOCATION?.includes(':8060')) {
             const location = headers.LOCATION;
+            console.log('Found potential Roku at:', rinfo.address);
+
             try {
-                const response = await fetch(location);
-                const xml = await response.text();
-                const parser = new xml2js.Parser();
-                const result = await parser.parseStringPromise(xml);
+                // Try to get device info directly
+                const deviceInfoUrl = `http://${rinfo.address}:8060/query/device-info`;
+                const response = await fetch(deviceInfoUrl, { timeout: 2000 });
 
-                const device = {
-                    ip: rinfo.address,
-                    name: result.root?.device?.[0]?.friendlyName?.[0] || 'Roku Device',
-                    model: result.root?.device?.[0]?.modelName?.[0] || 'Unknown',
-                    serial: result.root?.device?.[0]?.serialNumber?.[0] || 'Unknown'
-                };
+                if (response.ok) {
+                    const xml = await response.text();
+                    const parser = new xml2js.Parser({ explicitArray: false });
+                    const result = await parser.parseStringPromise(xml);
+                    const deviceInfo = result['device-info'] || result;
 
-                // Avoid duplicates
-                if (!discoveredDevices.find(d => d.ip === device.ip)) {
-                    discoveredDevices.push(device);
+                    const device = {
+                        ip: rinfo.address,
+                        name: deviceInfo['friendly-device-name'] || deviceInfo['model-name'] || 'Roku Device',
+                        model: deviceInfo['model-name'] || 'Unknown',
+                        serial: deviceInfo['serial-number'] || 'Unknown'
+                    };
+
+                    // Avoid duplicates
+                    if (!discoveredDevices.find(d => d.ip === device.ip)) {
+                        console.log('Added device:', device.name, device.ip);
+                        discoveredDevices.push(device);
+                    }
                 }
             } catch (err) {
-                console.error('Error parsing device info:', err.message);
+                console.log('Could not get device info from:', rinfo.address, err.message);
+
+                // Still add it as unknown device
+                if (!discoveredDevices.find(d => d.ip === rinfo.address)) {
+                    discoveredDevices.push({
+                        ip: rinfo.address,
+                        name: 'Roku Device',
+                        model: 'Unknown',
+                        serial: 'Unknown'
+                    });
+                }
             }
         }
     });
 
-    // Search for Roku devices
-    client.search('roku:ecp');
+    client.on('error', (err) => {
+        console.error('SSDP error:', err.message);
+    });
 
-    // Wait 3 seconds for responses
+    // Search with multiple service types
+    try {
+        client.search('roku:ecp');
+
+        setTimeout(() => {
+            client.search('urn:dial-multiscreen-org:service:dial:1');
+        }, 500);
+
+        setTimeout(() => {
+            client.search('ssdp:all');
+        }, 1000);
+    } catch (err) {
+        console.error('Search error:', err.message);
+    }
+
+    // Wait 5 seconds for responses (increased from 3)
     setTimeout(() => {
-        client.stop();
-        res.json({ devices: discoveredDevices });
-    }, 3000);
+        if (!searchComplete) {
+            searchComplete = true;
+            try {
+                client.stop();
+            } catch (e) { }
+
+            console.log('Discovery complete. Found', discoveredDevices.length, 'devices');
+            res.json({ devices: discoveredDevices });
+        }
+    }, 5000);
 });
 
 // Get device info
