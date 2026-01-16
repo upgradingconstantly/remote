@@ -380,6 +380,36 @@ body::before {
     color: white;
 }
 
+/* Back button on remote screen */
+.btn-back-remote {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-primary);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.btn-back-remote:hover {
+    background: var(--red-primary);
+    color: white;
+    transform: scale(1.05);
+}
+
+.remote-container {
+    position: relative;
+}
+
 .discovered-devices {
     margin-top: 16px;
 }
