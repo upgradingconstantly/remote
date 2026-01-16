@@ -514,19 +514,46 @@ async function discoverDevices() {
         Searching...
     `;
 
+    // Check if we're on a hosted site (not localhost)
+    const isHosted = !window.location.hostname.includes('localhost') &&
+        !window.location.hostname.includes('127.0.0.1') &&
+        !window.location.hostname.match(/^192\.168\./);
+
     try {
         const response = await fetch('/api/discover');
         const data = await response.json();
 
         if (data.devices && data.devices.length > 0) {
             renderDiscoveredDevices(data.devices);
-            showNotification(`Found ${data.devices.length} Roku device(s)`, 'success');
+            showNotification(`Found ${data.devices.length} device(s)`, 'success');
         } else {
-            discoveredDevices.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 16px;">No devices found. Make sure your Roku is on and connected to the same network.</p>';
+            // Show helpful message based on environment
+            if (isHosted) {
+                discoveredDevices.innerHTML = `
+                    <div style="color: var(--text-muted); text-align: center; padding: 16px; font-size: 0.9rem;">
+                        <p style="margin-bottom: 12px;"><strong>Discovery only works locally</strong></p>
+                        <p style="margin-bottom: 8px;">To discover TVs, run the server on your home network:</p>
+                        <code style="background: var(--bg-secondary); padding: 8px 12px; border-radius: 8px; display: block; margin: 8px 0;">npm start</code>
+                        <p style="margin-top: 12px;">Or enter your TV's IP address manually above.<br>
+                        <small>(Find it in TV Settings → Network → About)</small></p>
+                    </div>
+                `;
+            } else {
+                discoveredDevices.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 16px;">No devices found. Make sure your TV is on and connected to the same Wi-Fi.</p>';
+            }
         }
     } catch (error) {
         console.error('Discovery error:', error);
-        showNotification('Discovery failed. Please enter IP manually.', 'error');
+        if (isHosted) {
+            discoveredDevices.innerHTML = `
+                <div style="color: var(--text-muted); text-align: center; padding: 16px; font-size: 0.9rem;">
+                    <p><strong>Enter your TV's IP address manually</strong></p>
+                    <p style="margin-top: 8px;">(Find it in TV Settings → Network)</p>
+                </div>
+            `;
+        } else {
+            showNotification('Discovery failed. Enter IP manually.', 'error');
+        }
     }
 
     discoverBtn.disabled = false;
