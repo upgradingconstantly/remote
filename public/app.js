@@ -816,7 +816,10 @@ async function loadApps() {
 }
 
 function renderApps(apps) {
-    appsGrid.innerHTML = apps.slice(0, 12).map(app => `
+    // Limit to 9 apps for clean 3x3 grid on mobile (no overflow/invisible apps)
+    const maxApps = window.innerWidth <= 480 ? 9 : 12;
+
+    appsGrid.innerHTML = apps.slice(0, maxApps).map(app => `
         <div class="app-item" onclick="launchApp('${app.id}')" title="${app.displayName}">
             <img class="app-icon" src="/api/app-icon/${app.id}?ip=${rokuIP}" alt="${app.displayName}" onerror="this.style.display='none'">
             <span class="app-name">${app.displayName}</span>

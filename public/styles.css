@@ -198,6 +198,42 @@ body::before {
     backdrop-filter: blur(10px);
 }
 
+.connection-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.connection-header h2 {
+    flex: 1;
+    font-size: 1.25rem;
+    text-align: center;
+    color: var(--text-primary);
+    margin: 0;
+    padding-right: 36px;
+    /* Balance for back button */
+}
+
+.btn-back {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.btn-back:hover {
+    background: var(--red-primary);
+    color: white;
+}
+
 .connection-card h2 {
     font-size: 1.25rem;
     margin-bottom: 20px;

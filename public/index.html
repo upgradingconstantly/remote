@@ -65,7 +65,14 @@
         <!-- Connection Panel -->
         <div class="connection-panel" id="connectionPanel" style="display: none;">
             <div class="connection-card">
-                <h2 id="connectionTitle">Connect to Roku</h2>
+                <div class="connection-header">
+                    <button class="btn-back" id="backToSelectBtn" onclick="changePlatform()" title="Change TV Type">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+                        </svg>
+                    </button>
+                    <h2 id="connectionTitle">Connect to Roku</h2>
+                </div>
 
                 <!-- Saved Devices -->
                 <div class="saved-devices-section" id="savedDevicesSection" style="display: none;">
