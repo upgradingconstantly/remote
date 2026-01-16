@@ -12,3 +12,5 @@ npm-debug.*
 web-build/
 .DS_Store
 *.log
+.env
+saved_devices.json

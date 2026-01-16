@@ -1,6 +1,7 @@
 {
     "name": "CamilaRemoteApp",
     "version": "1.0.0",
+    "description": "Expo-based Roku TV remote control",
     "private": true,
     "scripts": {
         "android": "expo start --android",
