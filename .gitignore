@@ -14,3 +14,4 @@ web-build/
 *.log
 .env
 saved_devices.json
+.expo-token
