@@ -307,10 +307,16 @@ async function runMacroYouTube() {
         // Launch YouTube
         await launchAppByName('YouTube');
 
-        // Wait 7 seconds
-        await sleep(7000);
+        // Wait 10 seconds for app to load
+        await sleep(10000);
 
-        // Click OK
+        // Click OK (first time)
+        await sendKeypress('Select');
+
+        // Wait 2 seconds
+        await sleep(2000);
+
+        // Click OK again
         await sendKeypress('Select');
 
         showNotification('YouTube macro complete!', 'success');
